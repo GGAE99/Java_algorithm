@@ -42,50 +42,42 @@ public class WentLength {
         int currentY = 0;
         int afterX = 0;
         int afterY = 0;
-        String newLineOne = "";
-        String newLineTwo = "";
         int count = 0;
-        for(int i=0; i<dirs.length(); i++){
+
+        for(int i = 0; i < dirs.length(); i++) {
             char command = dirs.charAt(i);
-            switch (command){
+            switch (command) {
                 case 'U':
-                    if(Math.abs(currentY) + 1 > 5){
-                        continue;
-                    }
+                    if (currentY + 1 > 5) continue;
                     afterY = currentY + 1;
                     break;
                 case 'R':
-                    if(Math.abs(currentX) + 1 > 5){
-                        continue;
-                    }
+                    if (currentX + 1 > 5) continue;
                     afterX = currentX + 1;
                     break;
                 case 'L':
-                    if(Math.abs(currentX) + 1 > 5){
-                        continue;
-                    }
+                    if (currentX - 1 < -5) continue;
                     afterX = currentX - 1;
                     break;
                 case 'D':
-                    if(Math.abs(currentY) + 1 > 5){
-                        continue;
-                    }
+                    if (currentY - 1 < -5) continue;
                     afterY = currentY - 1;
                     break;
             }
-            newLineOne = Integer.toString(currentX) + Integer.toString(currentY) + Integer.toString(afterX) + Integer.toString(afterY);
-            newLineTwo = Integer.toString(afterX) + Integer.toString(afterY) + Integer.toString(currentX) + Integer.toString(currentY);
-            if(lines.contains(newLineOne) || lines.contains(newLineTwo)){
-                currentX = afterX;
-                currentY = afterY;
-                continue;
-            }else{
-                count += 1;
-                lines.add(newLineOne);
-                lines.add(newLineTwo);
-                currentX = afterX;
-                currentY = afterY;
+
+            // 양방향 경로를 고려
+            String newLine = Integer.toString(currentX) + Integer.toString(currentY) +
+                    Integer.toString(afterX) + Integer.toString(afterY);
+            String reverseLine = Integer.toString(afterX) + Integer.toString(afterY) +
+                    Integer.toString(currentX) + Integer.toString(currentY);
+
+            if (!lines.contains(newLine) && !lines.contains(reverseLine)) {
+                count++;
+                lines.add(newLine); // 양방향이므로 한쪽만 저장하면 됨
             }
+
+            currentX = afterX;
+            currentY = afterY;
         }
         return count;
     }
