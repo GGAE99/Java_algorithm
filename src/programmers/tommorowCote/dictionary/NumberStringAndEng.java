@@ -1,4 +1,7 @@
 package programmers.tommorowCote.dictionary;
+
+import java.util.HashMap;
+
 /*
 문제
 네오와 프로도가 숫자놀이를 하고 있습니다.
@@ -35,15 +38,46 @@ s	                    result
 "123"	                123
 
 의사 코드
-1.
+1. 받은 값을 for문을 돌며 확인한다.
+2. 먼저 int값인지 아닌지를 확인하고, int값이라면 답에 값을 추가한다.
+3. int값이 아니라면 딕셔너리를 사용해 만든 숫자와 영어의 구조를 비교하여 올바른 숫자를 뽑는다.
+4. 일치하는 값이 있을 때 값을 추가해준다.
  */
 public class NumberStringAndEng {
     public static void main(String[] args) {
-
+        String s = "one4seveneight";
+        int answer = solution(s);
+        System.out.println("answer = " + answer);
     }
 
     public static int solution(String s) {
-        int answer = 0;
-        return answer;
+        String answer = "";
+        HashMap<String, Integer> dic = new HashMap<>();
+
+        dic.put("zero",0);
+        dic.put("one",1);
+        dic.put("two",2);
+        dic.put("three",3);
+        dic.put("four",4);
+        dic.put("five",5);
+        dic.put("six",6);
+        dic.put("seven",7);
+        dic.put("eight",8);
+        dic.put("nine",9);
+
+        String check="";
+        for(int i=0; i<s.length(); i++){
+            char part = s.charAt(i);
+            if(Character.isDigit(part)){
+                answer += part;
+            }else{
+                check += part;
+                if(dic.containsKey(check)){
+                    answer += dic.get(check);
+                    check = "";
+                }
+            }
+        }
+        return Integer.parseInt(answer);
     }
 }
