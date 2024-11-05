@@ -49,79 +49,48 @@ public class AviPlayer {
     }
 
     public static String solution(String video_len, String pos, String op_start, String op_end, String[] commands) {
-        String answer = "";
-        String answerMinute = "";
-        String answerSecond = "";
-        int currnetMinute = Integer.parseInt(pos.substring(0, 2));
-        int currentSecond = Integer.parseInt(pos.substring(3, 5));
-        int opStartMinute = Integer.parseInt(op_start.substring(0, 2));
-        int opStartSecond = Integer.parseInt(op_start.substring(3, 5));
-        int opEndMinute = Integer.parseInt(op_end.substring(0, 2));
-        int opEndSecond = Integer.parseInt(op_end.substring(3, 5));
-        int videoMinute = Integer.parseInt(video_len.substring(0, 2));
-        int videoSecond = Integer.parseInt(video_len.substring(3, 5));
-        if(checkOpEn(currnetMinute, currentSecond, opStartMinute, opStartSecond, opEndMinute, opEndSecond)){
-            currnetMinute = opEndMinute;
-            currentSecond = opEndSecond;
+        // 현재 위치, 오프닝 시작과 끝, 비디오 길이를 초 단위로 변환
+        int currentPosition = timeToSeconds(pos);
+        int videoLength = timeToSeconds(video_len);
+        int opStart = timeToSeconds(op_start);
+        int opEnd = timeToSeconds(op_end);
+
+        // 오프닝 구간에 있는지 확인하여 위치 이동
+        if (currentPosition >= opStart && currentPosition <= opEnd) {
+            currentPosition = opEnd;
         }
+
+        // 명령어 처리
         for (String command : commands) {
-            switch (command){
+            switch (command) {
                 case "prev":
-                    if (currentSecond -10>-1){
-                        currentSecond -= 10;
-                    }else{
-                        currentSecond = currentSecond + 60 - 10;
-                        if(currnetMinute > 0){
-                            currnetMinute -=1;
-                        }else{
-                            currnetMinute = 0;
-                            currentSecond = 0;
-                        }
-                    }
+                    currentPosition = Math.max(0, currentPosition - 10);  // 10초 전으로 이동
                     break;
                 case "next":
-                    if(currentSecond + 10 < 60){
-                        currentSecond += 10;
-                    }else{
-                        currentSecond = currentSecond - 50;
-                        currnetMinute += 1;
-                        // 시간 추가해야될 수 있음 ㄱㄷㄱㄷ
-                    }
-                    if(currnetMinute>videoMinute){
-                        currnetMinute = videoMinute;
-                        currentSecond = videoSecond;
-                    } else if (currnetMinute==videoMinute && currentSecond>videoSecond) {
-                        currentSecond = videoSecond;
-                    }
+                    currentPosition = Math.min(videoLength, currentPosition + 10);  // 10초 후로 이동
                     break;
             }
-            if(checkOpEn(currnetMinute, currentSecond, opStartMinute, opStartSecond, opEndMinute, opEndSecond)){
-                currnetMinute = opEndMinute;
-                currentSecond = opEndSecond;
+            // 명령 후 오프닝 구간인지 재확인
+            if (currentPosition >= opStart && currentPosition <= opEnd) {
+                currentPosition = opEnd;
             }
         }
-        if(currnetMinute < 10){
-            answerMinute = "0" + Integer.toString(currnetMinute);
-        }else{
-            answerMinute = Integer.toString(currnetMinute);
-        }
-        if(currentSecond < 10){
-            answerSecond = "0" + Integer.toString(currentSecond);
-        }else{
-            answerSecond = Integer.toString(currentSecond);
-        }
-        answer =  answerMinute + ":" + answerSecond;
-        return answer;
+
+        // 최종 위치를 "mm:ss" 형식으로 변환하여 반환
+        return secondsToTime(currentPosition);
     }
 
-    public static boolean checkOpEn(int currnetMinute, int currentSecond, int opStartMinute, int opStartSecond, int opEndMinute, int opEndSecond){
-        if(currnetMinute == opStartMinute && currentSecond >=opStartSecond){
-            return true;
-        } else if (currnetMinute==opEndMinute && currentSecond < opEndSecond) {
-            return true;
-        } else if (currnetMinute > opStartMinute && currnetMinute < opEndMinute) {
-            return true;
-        }
-        return false;
+    // "mm:ss" 형식을 초 단위로 변환하는 함수
+    private static int timeToSeconds(String time) {
+        int minutes = Integer.parseInt(time.substring(0, 2));
+        int seconds = Integer.parseInt(time.substring(3, 5));
+        return minutes * 60 + seconds;
+    }
+
+    // 초 단위를 "mm:ss" 형식으로 변환하는 함수
+    private static String secondsToTime(int totalSeconds) {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 }
