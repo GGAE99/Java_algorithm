@@ -52,6 +52,7 @@ expressions	                                                result
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FormulaRetake340210 {
     public static void main(String[] args) {
@@ -62,15 +63,30 @@ public class FormulaRetake340210 {
     public static String[] solution(String[] expressions) {
         String[] answer = {};
         List<String> xFrom = new ArrayList<>();
-        int currnetForm = 0;
-        for(int i=0; i<expressions.length; i++){
-            String form = expressions[i];
-            if(form.charAt(form.length()-1) == 'X'){
-                xFrom.add(form);
-            }else{
+        int currnetForm = 2;
+        for (String form : expressions) {
+            String[] formSplit = form.split(" ");
+            int firstNum = Integer.parseInt(formSplit[0]);
+            int firstTen = firstNum/10;
+            int firstOne = firstNum%10;
+            String oper = formSplit[1];
+            int secondNum = Integer.parseInt(formSplit[2]);
+            int secondTen = secondNum/10;
+            int secondOne = secondNum%10;
 
+            // 각 자리의 수가 어디까지 표현되어있는지 확인하고 차수계산
+            if(firstTen > 0){
+                currnetForm = Math.max(currnetForm, firstTen);
             }
+            if(secondTen > 0){
+                currnetForm = Math.max(currnetForm, secondTen);
+            }
+            currnetForm = Math.max(firstOne, currnetForm);
+            currnetForm = Math.max(secondOne, currnetForm);
 
+            if (Objects.equals(formSplit[4], "X")) {
+                xFrom.add(form);
+            }
         }
 
         return answer;
