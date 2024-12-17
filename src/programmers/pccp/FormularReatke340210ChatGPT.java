@@ -1,4 +1,5 @@
 package programmers.pccp;
+import java.util.*;
 
 /*
 문제
@@ -50,62 +51,100 @@ expressions	                                                result
 4. 현재 계산할 수 없는 수식인지 판단도 필요
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-public class FormulaRetake340210 {
+public class FormularReatke340210ChatGPT {
     public static void main(String[] args) {
-        String[] expression = {"14 + 3 = 17", "13 - 6 = X", "51 - 5 = 44"};
-        System.out.println(solution(expression));
+        String[] expressions = {"1 + 1 = 2", "1 + 3 = 4", "1 + 5 = X", "1 + 2 = X"};
+        System.out.println(Arrays.toString(solution(expressions)));
     }
 
     public static String[] solution(String[] expressions) {
-        String[] answer = {};
-        List<String> xFrom = new ArrayList<>();
-        int currnetForm = 2;
-        for (String form : expressions) {
-            String[] formSplit = form.split(" "); // 수식 분해해서 수, 수식, 결과로 분해
-
-            int firstNum = Integer.parseInt(formSplit[0]); // 첫번째 수
-            int firstTen = firstNum/10;
-            int firstOne = firstNum%10;
-
-            int secondNum = Integer.parseInt(formSplit[2]); // 두번째 수
-            int secondTen = secondNum/10;
-            int secondOne = secondNum%10;
-
-            String formula = formSplit[1]; // 수식
-
-            // 각 자리의 수가 어디까지 표현되어있는지 확인하고 차수계산
-            if(firstTen > 0){
-                currnetForm = Math.max(currnetForm, firstTen);
-            }
-            if(secondTen > 0){
-                currnetForm = Math.max(currnetForm, secondTen);
-            }
-            currnetForm = Math.max(firstOne, currnetForm);
-            currnetForm = Math.max(secondOne, currnetForm);
-
-            if (Objects.equals(formSplit[4], "X")) {
-                xFrom.add(form);
-            }else{
-                calcCurrentForm(firstNum, secondNum, formula, Integer.parseInt(formSplit[3]));
+        List<String> result = new ArrayList<>();
+        Set<Integer> possibleBases = new HashSet<>();
+        for (int base = 2; base <= 9; base++) {
+            if (isValidBase(expressions, base)) {
+                possibleBases.add(base);
             }
         }
 
-        return answer;
+        for (String expression : expressions) {
+            if (expression.contains("X")) {
+                result.add(resolveUnknown(expression, possibleBases));
+            }
+        }
+
+        return result.toArray(new String[0]);
     }
-    
-    public static int calcCurrentForm(int firstNum, int secondNum, String formula, int result){
-        int maxForm = 0;
-        int tenResult = 0;
-        if(formula.equals("+")){
-            tenResult = firstNum + secondNum;
-        }else{
-            tenResult = firstNum - secondNum;
+
+    private static boolean isValidBase(String[] expressions, int base) {
+        for (String expression : expressions) {
+            if (!expression.contains("X")) {
+                String[] parts = expression.split(" ");
+                int left = convertToBase(parts[0], base);
+                int right = convertToBase(parts[2], base);
+                int result = convertToBase(parts[4], base);
+
+                if (left == -1 || right == -1 || result == -1) return false;
+                if (parts[1].equals("+") && left + right != result) return false;
+                if (parts[1].equals("-") && left - right != result) return false;
+            }
+        }
+        return true;
+    }
+
+    private static String resolveUnknown(String expression, Set<Integer> possibleBases) {
+        String[] parts = expression.split(" ");
+        String leftStr = parts[0];
+        String operator = parts[1];
+        String rightStr = parts[2];
+
+        List<String> possibleResults = new ArrayList<>();
+        for (int base : possibleBases) {
+            int left = convertToBase(leftStr, base);
+            int right = convertToBase(rightStr, base);
+
+            if (left == -1 || right == -1) continue;
+
+            int result;
+            if (operator.equals("+")) {
+                result = left + right;
+            } else {
+                result = left - right;
+            }
+
+            String resultStr = convertFromBase(result, base);
+            if (resultStr != null) {
+                possibleResults.add(resultStr);
+            }
         }
 
-        return maxForm;
+        if (possibleResults.isEmpty()) return expression.replace("X", "?");
+        if (new HashSet<>(possibleResults).size() > 1) return expression.replace("X", "?");
+        return expression.replace("X", possibleResults.get(0));
+    }
+
+    private static int convertToBase(String numStr, int base) {
+        try {
+            int value = 0;
+            for (char c : numStr.toCharArray()) {
+                int digit = c - '0';
+                if (digit < 0 || digit >= base) return -1;
+                value = value * base + digit;
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static String convertFromBase(int value, int base) {
+        StringBuilder sb = new StringBuilder();
+        while (value > 0) {
+            int digit = value % base;
+            if (digit >= base) return null;
+            sb.append((char) (digit + '0'));
+            value /= base;
+        }
+        return sb.reverse().toString();
     }
 }
+
