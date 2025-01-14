@@ -25,16 +25,122 @@ level ≥ 3이면 퍼즐을 틀리지 않으며, 2의 시간을 사용하게 됩
 제한 시간 limit
 이전 퍼
 
+입출력 예
+diffs	                    times	                    limit	result
+[1, 5, 3]	                [2, 4, 7]	                30	    3
+[1, 4, 4, 2]	            [6, 3, 8, 2]	            59	    2
+[1, 328, 467, 209, 54]	    [2, 7, 1, 4, 3]	            1723	294
+[1, 99999, 100000, 99995]	[9999, 9001, 9999, 9001]	3456789012	39354
  */
 
 
+import java.util.Arrays;
+
 public class PuzzleGame340212 {
     public static void main(String[] args) {
-
+        int[] diffs = {1, 328, 467, 209, 54};
+        int[] times = {2, 7, 1, 4, 3};
+        long limit = 1723;
+        int result = solution(diffs, times, limit);
+        System.out.println("result " + result);
     }
+
+//    public static void main(String[] args) {
+//        int[] diffs = {1, 99999, 100000, 99995};
+//        int[] times = {9999, 9001, 9999, 9001};
+//        long limit = 3456789012L;
+//        int result = solution(diffs, times, limit);
+//        System.out.println("result " + result);
+//    }
+
+//    public static int solution(int[] diffs, int[] times, long limit) {
+//        int currentLevel = Arrays.stream(diffs).max().getAsInt();  // 최대 난이도
+//
+//        while (true) {
+//            int spendTime = 0;
+//            int prevTime = 0;
+//
+//            for (int i = 0; i < diffs.length; i++) {
+//                int diff = diffs[i];
+//                int cha = diff - currentLevel;
+//                if (cha > 0) {
+//                    spendTime += cha * prevTime;
+//                }
+//                spendTime += times[i];
+//                prevTime = times[i];
+//            }
+//            if (spendTime > limit) {
+//                break;
+//            }
+//            currentLevel --;
+//        }
+//        return currentLevel;
+//    }
+
+
+//    public static int solution(int[] diffs, int[] times, long limit) {
+//        int currentLevel = Arrays.stream(diffs).max().getAsInt();  // 최대 난이도
+//
+//        while (true) {
+//            int spendTime = 0;
+//
+//            for (int i = 0; i < diffs.length; i++) {
+//                int diff = diffs[i];
+//                int cha = diff - currentLevel;
+//
+//                if (cha > 0) {
+//                    spendTime += cha * times[i];  // 현재 퍼즐의 시간
+//                    if (i > 0) {
+//                        spendTime += cha * times[i - 1];  // 이전 퍼즐의 시간
+//                    }
+//                }
+//
+//                spendTime += times[i];  // 퍼즐 해결 시간
+//            }
+//
+//            if (spendTime > limit) {
+//                break;
+//            }
+//            currentLevel--;
+//        }
+//
+//        return currentLevel;
+//    }
 
     public static int solution(int[] diffs, int[] times, long limit) {
-        int answer = 0;
-        return answer;
+        int maxValue = Arrays.stream(diffs).max().getAsInt();
+        int minValue = 1;
+
+        while (minValue < maxValue) {
+            int level = (maxValue + minValue) / 2;
+            long time = calTime(diffs, times, level);
+
+            if (time <= limit) {
+                maxValue = level;
+            } else {
+                minValue = level + 1;
+            }
+        }
+
+        return maxValue;
     }
+
+    private static long calTime(int[] diffs, int[] times, int level) {
+        long time = 0;
+
+        for (int i = 0; i < diffs.length; i++) {
+            int levDiff = diffs[i] - level;
+
+            if (levDiff <= 0) {
+                time += times[i];
+            } else {
+                int preTime = (i == 0) ? 0 : times[i - 1];
+                time += (preTime + times[i]) * levDiff + times[i];
+            }
+        }
+
+        return time;
+    }
+
+
 }
