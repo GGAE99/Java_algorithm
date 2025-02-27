@@ -25,19 +25,93 @@ package programmers.pccp;
     - 같은 포인트를 연속으로 방문하는 입력은 주어지지 않습니다.
     - 1 ≤ routes[i][j] ≤ n
 
+의사 코드
+    1. 먼저 각각의 로봇들이 각 시점에 어디에 위치해있는지 저장하는 저장자오가 필요
+    2. 시점을 모든 로봇에 대하여 동시에 돌리지 말고 먼저 각가그이 로봇이 시점마다 어디에 있었는지를 먼저 저장
+    3. 모든 시점 저장이 끝났다면 그때 충돌 위험이 있는지 검사
+*/
 
- */
+import java.util.*;
+
 public class FoundDangerBoom {
+    static List<Map<String, Integer>> timeMaps = new ArrayList<>();
+
     public static void main(String[] args) {
-        // FoundDangerBoom의 인스턴스를 생성
         FoundDangerBoom instance = new FoundDangerBoom();
-        int[][] points = {{3,2}, {6,4}, {4,7}, {1,4}};
+        int[][] poins = {{3,2},{6,4},{4,7},{1,4}};
         int[][] routes = {{4,2},{1,3},{4,2},{4,3}};
         int answer = instance.solution(points, routes);
+        System.out.println(answer);            
     }
 
-    public int solution(int[][] points, int[][] routes) {
+    public int solution(int[][] points, int[][] routes){
+        for(int i=0; i<100; i++) {
+            timeMaps.add(new HashMap<>());
+        }
+        // 라우트 확인
+        for(int[] route : routes) {
+            insertRoute(points, route);
+        }
+        // 충돌 위험 확인
+        reurn checkBomb();
+    }
+
+    public void insertRoute(int[][] points, int[] route) {
+        // 현재 로봇의 위치가 어디있는지 담아둠
+        int[] current = points[route[0]-1].clone();
+        HashMap<String, Integer> timeMap = (HashMap<String, Integer>) timeMaps.get(0);
+        if(timeMap.containsKey(Arrays.toString(current))) {
+            timeMap.put(Arrays.toString(current), timeMap.get(Arrays.toString(current)) + 1);
+        }else{
+            timeMap.put(Arrays.toString(current), 1);
+        }
+        for(int i=1; i<route.length; i++){
+            int repeat = 1;
+            int[] endPoint = points[route[i]-1];
+            //모든 계산이 끝났는지 확인
+            boolean notOver = true;
+            while(true){
+                HashMap<String, Integer> newtimeMap = (HashMap<String, Integer>) timeMaps.get(repeat);            
+                if(endPoint[0] != currnet[0]){
+                    if(endPoint[0] > current[0]){
+                        current[0] += 1;
+                    }else{
+                        current[0] -= 1;
+                    }
+                }else if(endPoint[1] != currnet[1]){
+                    if(endPoint[1] > current[1]){
+                        current[1] += 1;
+                    }else{
+                        current[1] -= 1;
+                    }
+                }else{
+                    break;
+                }
+                repeat++;
+                Sring key = Arrays.toString(current);
+                if(newtimeMap.containsKey(key)) {
+                    newtimeMap.put(key, newtimeMap.get(key) + 1);
+                }else{
+                    newtimeMap.put(key,1);
+                }
+            }
+        }
+    }
+
+    public int checkBomb() {
         int answer = 0;
+        for(Map<String, Integer> timeMap : timeMaps){
+            if(timeMap.isEmpty()){
+                break;
+            }
+            for(int count: timeMap.values()){
+                if(count >= 2){
+                    answer ++;
+                }
+            }
+        }
         return answer;
     }
+    
 }
+
